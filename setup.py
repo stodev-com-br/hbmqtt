@@ -8,7 +8,7 @@ from hbmqtt.version import get_version
 setup(
     name="hbmqtt",
     version=get_version(),
-    description="MQTT client/brocker using Python 3.4 asyncio library",
+    description="MQTT client/broker using Python 3.4 asyncio library",
     author="Nicolas Jouanin",
     author_email='nico@beerfactory.org',
     url="https://github.com/beerfactory/hbmqtt",
@@ -47,6 +47,7 @@ setup(
             'packet_logger_plugin = hbmqtt.plugins.logging:PacketLoggerPlugin',
             'auth_anonymous = hbmqtt.plugins.authentication:AnonymousAuthPlugin',
             'auth_file = hbmqtt.plugins.authentication:FileAuthPlugin',
+            'topic_taboo = hbmqtt.plugins.topic_checking:TopicTabooPlugin',
             'broker_sys = hbmqtt.plugins.sys.broker:BrokerSysPlugin',
         ],
         'hbmqtt.client.plugins': [
