@@ -14,6 +14,7 @@ Usage
              [-q | --qos QOS] [-d] [-k KEEP_ALIVE] [--clean-session]
              [--ca-file CAFILE] [--ca-path CAPATH] [--ca-data CADATA]
              [ --will-topic WILL_TOPIC [--will-message WILL_MESSAGE] [--will-qos WILL_QOS] [--will-retain] ]
+             [--extra-headers HEADER]
 
 Note that for simplicity, ``hbmqtt_pub`` uses mostly the same argument syntax as `mosquitto_pub`_.
 
@@ -44,6 +45,7 @@ Options
 --will-message      Specify a message that will be stored by the broker and sent out if this client disconnects unexpectedly. This must be used in conjunction with ``--will-topic``.
 --will-qos          The QoS to use for the Will. Defaults to 0. This must be used in conjunction with ``--will-topic``.
 --will-retain       If given, if the client disconnects unexpectedly the message sent out will be treated as a retained message. This must be used in conjunction with ``--will-topic``.
+--extra-headers     Specify a JSON object string with key-value pairs representing additional headers that are transmitted on the initial connection, but only when using a websocket connection
 
 
 .. _MQTT URL scheme: https://github.com/mqtt/mqtt.github.io/wiki/URI-Scheme
@@ -59,7 +61,7 @@ If ``-c`` argument is given, ``hbmqtt_pub`` will read specific MQTT settings for
 * ``default_qos`` : Default QoS for messages published. Defaults to 0.
 * ``default_retain`` : Default retain value to messages published. Defaults to ``false``.
 * ``auto_reconnect`` : Enable or disable auto-reconnect if connectection with the broker is interrupted. Defaults to ``false``.
-* ``reconnect_retries`` : Maximum reconnection retries. Defaults to ``2``.
+* ``reconnect_retries`` : Maximum reconnection retries. Defaults to ``2``. Negative value will cause client to reconnect infinietly.
 * ``reconnect_max_interval`` : Maximum interval between 2 connection retry. Defaults to ``10``.
 
 
@@ -92,6 +94,11 @@ Send the contents of a file in two ways:
     hbmqtt_pub --url mqtt://localhost -t my/topic -f ./data
 
     hbmqtt_pub --url mqtt://localhost -t my/topic -s < ./data
+
+Publish temperature information to localhost with QoS 1 over mqtt encapsulated in a websocket connection and additional headers:
+::
+
+    hbmqtt_pub --url wss://localhost -t sensors/temperature -m 32 -q 1 --extra-headers '{"Authorization": "Bearer <token>"}'
 
 
 .. _mosquitto_pub : http://mosquitto.org/man/mosquitto_pub-1.html
