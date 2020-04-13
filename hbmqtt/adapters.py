@@ -121,8 +121,7 @@ class WebSocketsWriter(WriterAdapter):
         self._stream = io.BytesIO(b'')
 
     def get_peer_info(self):
-        extra_info = self._protocol.writer.get_extra_info('peername')
-        return extra_info[0], extra_info[1]
+        return self._protocol.remote_address
 
     @asyncio.coroutine
     def close(self):
@@ -159,13 +158,16 @@ class StreamWriterAdapter(WriterAdapter):
     def __init__(self, writer: StreamWriter):
         self.logger = logging.getLogger(__name__)
         self._writer = writer
+        self.is_closed = False # StreamWriter has no test for closed...we use our own
 
     def write(self, data):
-        self._writer.write(data)
+        if not self.is_closed:
+            self._writer.write(data)
 
     @asyncio.coroutine
     def drain(self):
-        yield from self._writer.drain()
+        if not self.is_closed:
+            yield from self._writer.drain()
 
     def get_peer_info(self):
         extra_info = self._writer.get_extra_info('peername')
@@ -173,10 +175,14 @@ class StreamWriterAdapter(WriterAdapter):
 
     @asyncio.coroutine
     def close(self):
-        yield from self._writer.drain()
-        if self._writer.can_write_eof():
-            self._writer.write_eof()
-        self._writer.close()
+        if not self.is_closed:
+            self.is_closed = True # we first mark this closed so yields below don't cause races with waiting writes
+            yield from self._writer.drain()
+            if self._writer.can_write_eof():
+                self._writer.write_eof()
+            self._writer.close()
+            try: yield from self._writer.wait_closed() # py37+
+            except AttributeError: pass
 
 
 class BufferReader(ReaderAdapter):
